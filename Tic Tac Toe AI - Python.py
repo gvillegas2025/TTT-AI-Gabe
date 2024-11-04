@@ -123,7 +123,34 @@ class RandomAI:
             if game.is_valid_move(i):
                 possibleMoves.append(i)
         return (random.choice(possibleMoves))
+    
+class GabeAI:
+    def determine_move(self, game):
+        corners = [0,2,6,8]
+        possibleMoves = []
+        #add all open spaces into a list to then randomly choose one
+        for i in range(0,9):
+            if game.is_valid_move(i):
+                possibleMoves.append(i)
 
+        valid_corners = [] # creates a list of valid corner and non-corner tiles, where I want to play first
+        valid_non_corners = []
+        for tile in possibleMoves:
+            if tile in corners:
+                valid_corners.append(tile)
+            else:
+                valid_non_corners.append(tile)
+
+        if valid_corners == [] and len(valid_corners)<=3:
+            if valid_non_corners == []:
+                move = None ## this shouldn't happen since the board would be full
+            else:
+                move = random.choice(valid_non_corners)
+        else:
+            move = random.choice(valid_corners)
+
+        
+        return move
 
 if __name__ == "__main__":
     # Here you can decide how to initialize players
@@ -136,7 +163,10 @@ if __name__ == "__main__":
     # For students' AI competition:
     player1 = HumanPlayer('X')
     #player2 = HumanPlayer('X')
-    player2 = AIPlayer('O', SimpleAI())  # Replace with student AI implementation - name function with your name ie: "Jim-AI"
+    #player2 = AIPlayer('O', SimpleAI())  # Replace with student AI implementation - name function with your name ie: "Jim-AI"
     #player2 = AIPlayer('X', RandomAI())  # Replace with another student AI implementation or the same for testing ie: "Mary-AI"
+
+    player2 = AIPlayer('O', GabeAI())
+
     game = TicTacToe(player1, player2)
     game.play()
