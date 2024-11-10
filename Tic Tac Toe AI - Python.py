@@ -125,7 +125,67 @@ class RandomAI:
                 possibleMoves.append(i)
         return (random.choice(possibleMoves))
     
-class GabeAI:
+# an AI strategy that prioritizes getting three corners 
+# before picking corners though, it will check if there is a winning move or not
+# if there are no more corners or winning moves, it will fill in the rest of the tiles
+class GabeSimpleAI:
+    def get_corners_GV(self,possibleMoves,corners): # creates lists of valid corner and non-corner tiles
+        valid_corners = [] 
+        valid_non_corners = [] 
+        for tile in possibleMoves:
+            if tile in corners:
+                valid_corners.append(tile)
+            else:
+                valid_non_corners.append(tile)
+        return valid_corners, valid_non_corners
+    
+    def block_or_win_GV(self,possibleMoves): #checks each move and returns the first winning move, for either player
+        for tile in possibleMoves:           #a winning move and a losing move hold the same value in this strategy, which yes has faults
+            if self.block_check_GV(tile) == True:
+                return tile
+        return None
+    
+    def block_check_GV(self,tile): # used in block_or_win_GV to actually find winning and blocking moves, and returns a boolean value
+        sim_board = game.board
+
+        sim_board[tile] = "X"
+        if game.check_win(sim_board):
+            sim_board[tile] = " "; return True
+        
+        sim_board[tile] = "O"
+        if game.check_win(sim_board):
+            sim_board[tile] = " "; return True
+        
+        sim_board[tile] = " "; return False
+
+    def determine_move(self, game): # funciton that calls all the beforehand funcitons and returns an integer to Mr. Labana's code
+        corners = [0,2,6,8]
+        possibleMoves = []
+        #add all open spaces into a list to then randomly choose one
+        for i in range(0,9):
+            if game.is_valid_move(i):
+                possibleMoves.append(i)
+
+        res = self.block_or_win_GV(possibleMoves)
+
+        if res == None: # Nothing to block or nothing to win
+            valid_corners, valid_non_corners = self.get_corners_GV(possibleMoves,corners)
+            
+
+            if valid_corners == [] and len(valid_corners)<=3:
+                if valid_non_corners == []:
+                    move = None ## this shouldn't happen since the board would be full
+                else:
+                    move = random.choice(valid_non_corners)
+            else:
+                move = random.choice(valid_corners)
+
+            
+            return move
+        
+        else: # something can be blocked or a win is possible
+            return res
+        
     def get_corners_GV(self,possibleMoves,corners): # creates lists of valid corner and non-corner tiles
         valid_corners = [] 
         valid_non_corners = [] 
@@ -237,8 +297,8 @@ if __name__ == "__main__":
     #player2 = AIPlayer('O', SimpleAI())  # Replace with student AI implementation - name function with your name ie: "Jim-AI"
     #player2 = AIPlayer('X', RandomAI())  # Replace with another student AI implementation or the same for testing ie: "Mary-AI"
     
-    #player1 = AIPlayer('X',GabeAI())
-    player2 = AIPlayer('O', GabeAI())
+    #player1 = AIPlayer('X',GabeSimpleAI())
+    player2 = AIPlayer('O', GabeSimpleAI())
 
     game = TicTacToe(player1, player2)
     game.play()
