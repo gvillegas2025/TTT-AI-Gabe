@@ -185,63 +185,6 @@ class GabeSimpleAI:
         
         else: # something can be blocked or a win is possible
             return res
-        
-    def get_corners_GV(self,possibleMoves,corners): # creates lists of valid corner and non-corner tiles
-        valid_corners = [] 
-        valid_non_corners = [] 
-        for tile in possibleMoves:
-            if tile in corners:
-                valid_corners.append(tile)
-            else:
-                valid_non_corners.append(tile)
-        return valid_corners, valid_non_corners
-    
-    def block_or_win_GV(self,possibleMoves):
-        for tile in possibleMoves:
-            if self.block_check_GV(tile) == True:
-                return tile
-        return None
-    
-    def block_check_GV(self,tile):
-        sim_board = game.board
-
-        sim_board[tile] = "X"
-        if game.check_win(sim_board):
-            sim_board[tile] = " "; return True
-        
-        sim_board[tile] = "O"
-        if game.check_win(sim_board):
-            sim_board[tile] = " "; return True
-        
-        sim_board[tile] = " "; return False
-
-    def determine_move(self, game):
-        corners = [0,2,6,8]
-        possibleMoves = []
-        #add all open spaces into a list to then randomly choose one
-        for i in range(0,9):
-            if game.is_valid_move(i):
-                possibleMoves.append(i)
-
-        res = self.block_or_win_GV(possibleMoves)
-
-        if res == None: # Nothing to block or nothing to win
-            valid_corners, valid_non_corners = self.get_corners_GV(possibleMoves,corners)
-            
-
-            if valid_corners == [] and len(valid_corners)<=3:
-                if valid_non_corners == []:
-                    move = None ## this shouldn't happen since the board would be full
-                else:
-                    move = random.choice(valid_non_corners)
-            else:
-                move = random.choice(valid_corners)
-
-            
-            return move
-        
-        else: # something can be blocked or a win is possible
-            return res
 
 # Helper Tree class for MiniMax, implemented by Giancarlo
 class TreeNode:
@@ -268,11 +211,11 @@ class MiniMaxGG:
 
     # TODO: build tree and assign scores; I (Giancarlo) will do it
     def buildTree(self, symbol, board):
-        
+        pass
     
     # TODO: impement nethod that returns move based on tree scores
     def pickMove(self, symbol, board):
-
+        pass
 
     def determine_move(self):
         symbol = player2.symbol
