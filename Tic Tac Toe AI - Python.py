@@ -1,5 +1,6 @@
 
 # (c) 2024 Roland Labana
+# Modified by Gabriel Villegas and Giancarlo Umberto Ambrosino
 
 import random
 
@@ -182,7 +183,44 @@ class GabeAI:
         else: # something can be blocked or a win is possible
             return res
 
+# Helper Tree class for MiniMax, implemented by Giancarlo
+class TreeNode:
+    def __init__(self, value):
+        self.value = value
+        self.children = []
 
+    def add_child(self, child_node):
+        self.children.append(child_node)
+
+''' 
+"AI" that uses the MiniMax algorithm to determine the next move.
+The algorithm first builds a tree of all possibilities, then it
+assigns a score to each of them, and lastly it picks the value
+that is best for the current symbol.
+The algorithm assumes the other player will always play optimally.
+Implemented by Gabe and Giancarlo 
+'''
+class MiniMaxGG:
+
+    def __init__(self):
+        # TODO: implement logic to see if it is going first or not
+        self.firstMove = True
+
+    # TODO: build tree and assign scores; I (Giancarlo) will do it
+    def buildTree(self, symbol, board):
+        
+    
+    # TODO: impement nethod that returns move based on tree scores
+    def pickMove(self, symbol, board):
+
+
+    def determine_move(self):
+        symbol = player2.symbol
+        board = game.board
+
+        buildTree(symbol, board)
+
+        pickMove(board)
 
 if __name__ == "__main__":
     # Here you can decide how to initialize players
