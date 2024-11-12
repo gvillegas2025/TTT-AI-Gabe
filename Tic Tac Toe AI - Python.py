@@ -4,6 +4,8 @@
 
 import random
 
+DEBUG = False # Debug variable, set to True to enable debug functions
+
 class Player:
     def __init__(self, symbol):
         self.symbol = symbol
@@ -236,7 +238,7 @@ class MiniMaxGG:
                 board[move] = turn
                 # Recursively call buildTree on the new board state
                 next_turn = 'X' if turn == 'O' else 'O'
-                child_node = self.buildTree(board, next_turn)
+                child_node = self.buildTree(board[:], next_turn)
                 root.add_child(child_node)
                 # Undo the move
                 board[move] = ' '
@@ -251,19 +253,36 @@ class MiniMaxGG:
         return root
     
     # TODO: implement method that returns move based on tree scores
-    def pickMove(self, symbol, board):
-        return
+    # Look at the node's children and find the ones with a -1 score
+    def pickMove(self, currBoard):
+        NODE_LOC = 0
+        DEPTH_LOC = 1
+        goodMoves = []
+        for move in currBoard.children: # finding -1 scores
+            if move.score == -1:
+                goodMoves.append([move,0]) # the 0 will be replaced with a depth number
+        
+        depth_of_moves = []
+        for move in goodMoves: # finds the best depth of each child node to 
+            move[DEPTH_LOC] = move[NODE_LOC].find_best_depth
+            depth_of_moves.append(move[DEPTH_LOC])
+        
+        best_depth = min(depth_of_moves)
+        for move in goodMoves:
+            if move[DEPTH_LOC] == best_depth:
+                return best_depth
 
     def determine_move(self, game):
         board = game.board
 
         self.root = TreeNode(board, -2)
 
-        self.root.score = self.buildTree(board, self.symbol)
+        self.root = self.buildTree(board[:], self.symbol)
 
-        self.root.print_tree()
+        if DEBUG:
+            self.root.print_tree()
 
-        self.pickMove(board)
+        return self.pickMove(self.root)
 
 if __name__ == "__main__":
     # Here you can decide how to initialize players
@@ -281,7 +300,7 @@ if __name__ == "__main__":
     #player2 = AIPlayer('X', RandomAI())  # Replace with another student AI implementation or the same for testing ie: "Mary-AI"
     
     #player1 = AIPlayer('X',GabeSimpleAI())
-    player2 = AIPlayer('O', GabeSimpleAI())
+    player2 = AIPlayer('O', MiniMaxGG('O'))
 
     game = TicTacToe(player1, player2)
     game.play()
