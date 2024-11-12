@@ -277,19 +277,41 @@ class MiniMaxGG:
         NODE_LOC = 0
         DEPTH_LOC = 1
         goodMoves = []
+        tieMoves = []
+        badMoves = []
         for move in currBoard.children: # finding -1 scores
             if move.score == -1:
                 goodMoves.append([move,0]) # the 0 will be replaced with a depth number
+            elif move.score == 0:
+                tieMoves.append([move,0]) 
+           # elif move.score == 1:
+               # badMoves.append([move,0])
         
         depth_of_moves = []
-        for move in goodMoves: # finds the best depth of each child node to 
-            move[DEPTH_LOC] = move[NODE_LOC].find_best_depth
+
+        if len(goodMoves) > 0: # will default the list to be good moves, but if there are none then tie moves must be used
+            filled_list = goodMoves
+        elif len(tieMoves) > 0:
+            filled_list = tieMoves
+      #  else:
+           # filled_list = badMoves
+
+        for move in filled_list: # finds the best depth of each child node to 
+            move[DEPTH_LOC] = move[NODE_LOC].find_best_depth(-1, False)
             depth_of_moves.append(move[DEPTH_LOC])
         
         best_depth = min(depth_of_moves)
-        for move in goodMoves:
+        for move in filled_list:
             if move[DEPTH_LOC] == best_depth:
-                return best_depth
+                best_move = move
+
+        game_board = game.board
+        best_move = best_move[NODE_LOC].board
+        print(game_board,"\n",best_move)
+        for tile in range(0,len(game_board)):
+            if game_board[tile] != best_move[tile]:
+                print("------------",tile)
+                return tile
 
     def determine_move(self, game):
         board = game.board
