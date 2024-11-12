@@ -188,12 +188,21 @@ class GabeSimpleAI:
 
 # Helper Tree class for MiniMax, implemented by Giancarlo
 class TreeNode:
-    def __init__(self, value):
-        self.value = value
+    def __init__(self, board, score):
+        self.board = board
+        self.score = score
         self.children = []
 
     def add_child(self, child_node):
         self.children.append(child_node)
+    
+    def print_tree(self, level=0):
+        indent = "  " * level
+        board_str = ''.join(self.board)
+        print(f"{indent}Board: {board_str}, Score: {self.score}")
+        for child in self.children:
+            if isinstance(child, TreeNode):
+                child.print_tree(level + 1)
 
 ''' 
 "AI" that uses the MiniMax algorithm to determine the next move.
@@ -205,25 +214,56 @@ Implemented by Gabe and Giancarlo
 '''
 class MiniMaxGG:
 
-    def __init__(self):
+    def __init__(self, symbol):
         # TODO: implement logic to see if it is going first or not
         self.firstMove = True
+        self.symbol = symbol
 
-    # TODO: build tree and assign scores; I (Giancarlo) will do it
-    def buildTree(self, symbol, board):
-        pass
+    def buildTree(self, board, turn):
+        # Base cases for win or draw
+        if game.check_win(board):
+            return TreeNode(board, 1 if turn != self.symbol else -1)
+        if game.is_board_full():
+            return TreeNode(board, 0)
+
+        # Create root node for current board
+        root = TreeNode(board, 0)
+
+        # Iterate through available moves
+        for move in range(9):
+            if board[move] == ' ':
+                # Make the move
+                board[move] = turn
+                # Recursively call buildTree on the new board state
+                next_turn = 'X' if turn == 'O' else 'O'
+                child_node = self.buildTree(board, next_turn)
+                root.add_child(child_node)
+                # Undo the move
+                board[move] = ' '
+
+        # Assign score to root based on children's scores
+        if root.children:  # Ensure there are children before calculating the score
+            if turn == self.symbol:
+                root.score = max(child.score for child in root.children)
+            else:
+                root.score = min(child.score for child in root.children)
+
+        return root
     
-    # TODO: impement nethod that returns move based on tree scores
+    # TODO: implement method that returns move based on tree scores
     def pickMove(self, symbol, board):
-        pass
+        return
 
-    def determine_move(self):
-        symbol = player2.symbol
+    def determine_move(self, game):
         board = game.board
 
-        buildTree(symbol, board)
+        self.root = TreeNode(board, -2)
 
-        pickMove(board)
+        self.root.score = self.buildTree(board, self.symbol)
+
+        self.root.print_tree()
+
+        self.pickMove(board)
 
 if __name__ == "__main__":
     # Here you can decide how to initialize players
