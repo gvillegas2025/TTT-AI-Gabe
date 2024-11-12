@@ -4,6 +4,8 @@
 
 import random
 
+DEBUG = False # Debug variable, set to True to enable debug functions
+
 class Player:
     def __init__(self, symbol):
         self.symbol = symbol
@@ -236,7 +238,7 @@ class MiniMaxGG:
                 board[move] = turn
                 # Recursively call buildTree on the new board state
                 next_turn = 'X' if turn == 'O' else 'O'
-                child_node = self.buildTree(board, next_turn)
+                child_node = self.buildTree(board[:], next_turn)
                 root.add_child(child_node)
                 # Undo the move
                 board[move] = ' '
@@ -259,9 +261,10 @@ class MiniMaxGG:
 
         self.root = TreeNode(board, -2)
 
-        self.root.score = self.buildTree(board, self.symbol)
+        self.root = self.buildTree(board[:], self.symbol)
 
-        self.root.print_tree()
+        if DEBUG:
+            self.root.print_tree()
 
         self.pickMove(board)
 
