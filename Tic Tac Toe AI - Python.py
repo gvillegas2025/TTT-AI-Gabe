@@ -205,6 +205,25 @@ class TreeNode:
         for child in self.children:
             if isinstance(child, TreeNode):
                 child.print_tree(level + 1)
+                
+    def dfs(self, target_score, depth, find_max):
+    # Base case: if the node has the target score and is a leaf, return its depth
+    if self.score == target_score and not self.children:
+        return depth
+
+    # Recursive case: explore children
+    depths = [
+        child.dfs(target_score, depth + 1, find_max) for child in self.children
+        if (find_max and child.score >= target_score) or (not find_max and child.score <= target_score)
+    ]
+    return min(depths, default=float('inf'))
+    
+    """
+    Finds the depth of the shallowest node with the target score.
+    If find_max is True, we search for the highest score; otherwise, the lowest score.
+    """
+    def find_best_depth(self, target_score, find_max=True):
+        return self.dfs(target_score, 0, find_max)
 
 ''' 
 "AI" that uses the MiniMax algorithm to determine the next move.
@@ -265,6 +284,7 @@ class MiniMaxGG:
 
         if DEBUG:
             self.root.print_tree()
+            print(self.root.find_best_depth(target_score=-1, find_max=False))
 
         self.pickMove(board)
 
