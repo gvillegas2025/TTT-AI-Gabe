@@ -221,6 +221,7 @@ class TreeNode:
     """
     Finds the depth of the shallowest node with the target score.
     If find_max is True, we search for the highest score; otherwise, the lowest score.
+    Not implemented in Minimax V 1.1 but could be used in the future
     """
     def find_best_depth(self, target_score, find_max=True):
         return self.dfs(target_score, 0, find_max)
@@ -238,16 +239,27 @@ class MiniMaxGG:
     def __init__(self, symbol):
         self.symbol = symbol
 
-    # Builds the tree and assigns the scores according to leaf node outcomes
+    # Helper function; different from your is_board_full as it asks for a board 
+    # instead of checking the object's board field
+    def is_board_full(self, board):
+        return ' ' not in board
+
+    # Build the tree and assign scores based on the leaf nodes
     def buildTree(self, board, turn):
-        # Base cases for win or draw
+        # Base cases
+        winner = None
         if game.check_win(board):
-            return TreeNode(board, 1 if turn == self.symbol else -1)  # AI win = 1, Opponent win = -1
-        if game.is_board_full():
-            return TreeNode(board, 0)  # Draw = 0
+            winner = 'X' if turn == 'O' else 'O'
+        if winner:
+            return TreeNode(board, 1 if winner == self.symbol else -1)
+        if self.is_board_full(board):
+            return TreeNode(board, 0)
 
         # Create root node for current board
-        root = TreeNode(board, 0)
+        root = TreeNode(board[:], 0)
+
+        # Initialize list to store scores of child nodes
+        child_scores = []
 
         # Iterate through available moves
         for move in range(9):
@@ -258,79 +270,37 @@ class MiniMaxGG:
                 next_turn = 'X' if turn == 'O' else 'O'
                 child_node = self.buildTree(board[:], next_turn)
                 root.add_child(child_node)
+                child_scores.append(child_node.score)
                 # Undo the move
                 board[move] = ' '
 
         # Assign score to root based on children's scores
-        if root.children:  # Ensure there are children before calculating the score
-            if turn == self.symbol:
-                root.score = max(child.score for child in root.children)  # Maximize for AI's turn
-            else:
-                root.score = min(child.score for child in root.children)  # Minimize for opponent's turn
+        if turn == self.symbol:
+            root.score = max(child_scores)
+        else:
+            root.score = min(child_scores)
 
         return root
 
-    
-    # Look at the node's children and find the ones with a -1 score or 0
+    # Pick the first good move on the children array
     def pickMove(self):
-        NODE_LOC = 0
-        DEPTH_LOC = 1
-        goodMoves = []
-        depth_of_moves = []
+        # Choose the move with the best score
+        best_score = max(child.score for child in self.root.children)
+        best_moves = [child for child in self.root.children if child.score == best_score]
 
-        # Find moves with the best score (-1 for opponent, 0 for tie, 1 for AI win)
-        for move in self.root.children:
-            if move.score == 1:  # Prioritize winning moves for AI
-                goodMoves.append([move, 0])
-            elif move.score == 0:  # If no winning moves, consider ties
-                goodMoves.append([move, 0])
-            elif move.score == -1:  # Only consider losses if no better moves
-                goodMoves.append([move, 0])
+        # If multiple moves have the same best score, you can choose the first one
+        best_move = best_moves[0]
 
-        # Calculate depth for each good move to prioritize shallower depths (i.e. faster draw/win)
-        for move in goodMoves:
-            move[DEPTH_LOC] = move[NODE_LOC].find_best_depth(target_score=move[NODE_LOC].score, find_max=True)
-            depth_of_moves.append(move[DEPTH_LOC])
-
-        # Select move with the highest score and shallowest depth
-        best_depth = min(depth_of_moves)
-        for move in goodMoves:
-            if move[DEPTH_LOC] == best_depth:
-                best_move = move
-
-        # Return the position of the chosen move by comparing board states
-        game_board = game.board
-        best_move_board = best_move[NODE_LOC].board
-        for tile in range(len(game_board)):
-            if game_board[tile] != best_move_board[tile]:
-                return tile  # Return the move that results in the best board
-
+        # Find the move that resulted in this board
+        for tile in range(len(game.board)):
+            if game.board[tile] != best_move.board[tile]:
+                return tile
 
     def determine_move(self, game):
-        board = game.board
-
-        self.root = TreeNode(board, -2)
-
-        # Block logic
-        opponent_symbol = 'O' if self.symbol == 'X' else 'X'
-        for move in range(9):
-            if board[move] == ' ':
-                # Simulate the opponent's move
-                board[move] = opponent_symbol
-                if game.check_win(board):
-                    # If opponent wins with this move, block it
-                    board[move] = ' '  # Reset the board before returning
-                    return move
-                # Undo the simulated move
-                board[move] = ' '
-
-        self.root = self.buildTree(board[:], self.symbol)
-
-        if DEBUG:
-            self.root.print_tree()
-            print(self.root.find_best_depth(target_score=-1, find_max=False))
-
+        board = game.board[:]
+        self.root = self.buildTree(board, self.symbol)
         return self.pickMove()
+
 
 if __name__ == "__main__":
     # Here you can decide how to initialize players
